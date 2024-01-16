@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kubemonitor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kubemonitor
+  template:
+    metadata:
+      labels:
+        app: kubemonitor
+    spec:
+      containers:
+        - name: kubemonitor
+          image: kubemonitork8s:latest
+          ports:
+            - containerPort: 80
+              protocol: TCP
+          imagePullPolicy: IfNotPresent
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kubemonitor
+  labels:
+    prometheus: cluster-monitoring
+    k8s-app: kube-state-metrics
+spec:
+  selector:
+    app: kubemonitor
+  type: LoadBalancer
+  ports:
+    - name: kubemonitor
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+# NOTE: The service account `default:default` already exists in k8s cluster.
+# You can create a new account following like this:
+#---
+#apiVersion: v1
+#kind: ServiceAccount
+#metadata:
+#  name: <new-account-name>
+#  namespace: <namespace>
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: fabric8-rbac
+subjects:
+  - kind: ServiceAccount
+    # Reference to upper's `metadata.name`
+    name: default
+    # Reference to upper's `metadata.namespace`
+    namespace: default
+roleRef:
+  kind: ClusterRole
+  name: cluster-admin
+  apiGroup: rbac.authorization.k8s.io

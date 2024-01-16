@@ -1,0 +1,13 @@
+body {
+  background-color: #fafafa;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.card-content {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+h4 {
+  margin: 1px;
+}
